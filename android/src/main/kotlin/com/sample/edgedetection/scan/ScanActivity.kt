@@ -68,25 +68,34 @@ class ScanActivity : BaseActivity(), IScanView.Proxy {
             this.title = initialBundle.getString(EdgeDetectionHandler.SCAN_TITLE, "") as String
         }
 
-        findViewById<View>(R.id.gallery).visibility =
-                if (initialBundle.getBoolean(EdgeDetectionHandler.CAN_USE_GALLERY, true))
-                    View.VISIBLE
-                else View.GONE
+//        findViewById<View>(R.id.gallery).visibility =
+//                if (initialBundle.getBoolean(EdgeDetectionHandler.CAN_USE_GALLERY, true))
+//                    View.VISIBLE
+//                else View.GONE
 
-        findViewById<View>(R.id.gallery).setOnClickListener {
-            pickupFromGallery()
-        }
+//        findViewById<View>(R.id.gallery).setOnClickListener {
+//            pickupFromGallery(false,initialBundle)
+//        }
 
         if (initialBundle.containsKey(EdgeDetectionHandler.FROM_GALLERY) && initialBundle.getBoolean(EdgeDetectionHandler.FROM_GALLERY,false))
         {
-            pickupFromGallery()
+            pickupFromGallery(true,initialBundle)
         }
     }
 
-    private fun pickupFromGallery() {
+    private fun pickupFromGallery(isGallery:Boolean,initialBundle:Bundle ) {
         mPresenter.stop()
-        val gallery = Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI).apply{type="image/*"}
-        ActivityCompat.startActivityForResult(this, gallery, 1, null)
+        if(isGallery){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                var imagePath:String = initialBundle.getString(EdgeDetectionHandler.SAVE_TO,"")
+                val imageFile = File(imagePath)
+                val imageUri = Uri.fromFile(imageFile)
+                onImageSelected(imageUri)
+            }
+        }else{
+            val gallery = Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI).apply{type="image/*"}
+            ActivityCompat.startActivityForResult(this, gallery, 1, null)
+        }
     }
 
     override fun onStart() {
@@ -121,6 +130,7 @@ class ScanActivity : BaseActivity(), IScanView.Proxy {
         if (requestCode == REQUEST_CODE) {
             if (resultCode == Activity.RESULT_OK) {
                 setResult(Activity.RESULT_OK)
+                Log.i(TAG, "setResult(Activity.RESULT_OK) , setResult(Activity.RESULT_OK)")
                 finish()
             } else {
                 if (intent.hasExtra(EdgeDetectionHandler.FROM_GALLERY) && intent.getBooleanExtra(EdgeDetectionHandler.FROM_GALLERY, false))
@@ -146,7 +156,7 @@ class ScanActivity : BaseActivity(), IScanView.Proxy {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
         android.R.id.home -> {
-            onBackPressed()
+            onBackPressedDispatcher.onBackPressed()
             true
         }
         else -> super.onOptionsItemSelected(item)

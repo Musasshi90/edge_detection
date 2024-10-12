@@ -2,7 +2,11 @@ package com.sample.edgedetection
 
 import android.app.Activity
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
+import androidx.annotation.RequiresApi
+import com.sample.edgedetection.crop.CropActivity
 import com.sample.edgedetection.scan.ScanActivity
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding
@@ -14,8 +18,9 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
 
-class EdgeDetectionPlugin : FlutterPlugin, ActivityAware {
+class EdgeDetectionPlugin : FlutterPlugin, ActivityAware{
     private var handler: EdgeDetectionHandler? = null
+    private val TAG: String = EdgeDetectionPlugin::class.java.getSimpleName()
 
     override fun onAttachedToEngine(binding: FlutterPluginBinding) {
         handler = EdgeDetectionHandler()
@@ -127,7 +132,7 @@ class EdgeDetectionHandler : MethodCallHandler, PluginRegistry.ActivityResultLis
             finishWithAlreadyActiveError()
             return
         }
-        val initialIntent = Intent(Intent(getActivity()?.applicationContext, ScanActivity::class.java))
+        val initialIntent =Intent(Intent(getActivity()?.applicationContext, ScanActivity::class.java))
 
         val bundle = Bundle()
         bundle.putString(SAVE_TO, call.argument<String>(SAVE_TO) as String)
@@ -135,7 +140,6 @@ class EdgeDetectionHandler : MethodCallHandler, PluginRegistry.ActivityResultLis
         bundle.putString(CROP_BLACK_WHITE_TITLE, call.argument<String>(CROP_BLACK_WHITE_TITLE) as String )
         bundle.putString(CROP_RESET_TITLE, call.argument<String>(CROP_RESET_TITLE) as String)
         bundle.putBoolean(FROM_GALLERY, call.argument<Boolean>(FROM_GALLERY) as Boolean)
-
         initialIntent.putExtra(INITIAL_BUNDLE, bundle)
 
         getActivity()?.startActivityForResult(initialIntent, REQUEST_CODE)

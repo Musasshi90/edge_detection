@@ -6,6 +6,8 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import 'image_picker_utilities.dart';
+
 void main() {
   runApp(MyApp());
 }
@@ -70,9 +72,19 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> getImageFromGallery() async {
     // Generate filepath for saving
-    String imagePath = join((await getApplicationSupportDirectory()).path,
-        "${(DateTime.now().millisecondsSinceEpoch / 1000).round()}.jpeg");
-
+    String imagePath = '';
+    if (Platform.isIOS) {
+      imagePath = join((await getApplicationSupportDirectory()).path,
+          "${(DateTime
+              .now()
+              .millisecondsSinceEpoch / 1000).round()}.jpeg");
+    }else{
+      File? file = await ImagePickerUtilities.pickSingleImage();
+      if(file == null){
+        return;
+      }
+      imagePath = file.path;
+    }
     bool success = false;
     try {
       //Make sure to await the call to detectEdgeFromGallery.

@@ -5,9 +5,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f08b3923-f33b-4d39-b5f6-cea7d389432e" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/example/lib/image_picker_utilities.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Dart_SDK.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Dart_SDK.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/android/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/android/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/src/main/kotlin/com/sample/edgedetection/EdgeDetectionPlugin.kt" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/kotlin/com/sample/edgedetection/EdgeDetectionPlugin.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/src/main/kotlin/com/sample/edgedetection/crop/CropActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/kotlin/com/sample/edgedetection/crop/CropActivity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/src/main/kotlin/com/sample/edgedetection/scan/ScanActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/kotlin/com/sample/edgedetection/scan/ScanActivity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/src/main/res/layout/activity_scan.xml" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/res/layout/activity_scan.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/example/android/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/example/android/app/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/example/lib/main.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/example/pubspec.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/example/pubspec.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.lock" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -40,11 +50,15 @@
     "RunOnceActivity.cidr.known.project.marker": "true",
     "cidr.known.project.marker": "true",
     "dart.analysis.tool.window.visible": "false",
-    "last_opened_file_path": "C:/Users/Public/Repo/edge_detection",
+    "io.flutter.reload.alreadyRun": "true",
+    "last_opened_file_path": "C:/Users/Public/Repo/edge_detection/example/lib",
     "show.migrate.to.gradle.popup": "false"
   }
 }]]></component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Public\Repo\edge_detection\example\lib" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\ahmad\Desktop\edge_detection\android\src\main\kotlin\com\sample\edgedetection\processor" />
     </key>
