@@ -275,25 +275,50 @@ class ScanPresenter constructor(
 
     override fun onPictureTaken(p0: ByteArray?, p1: Camera?) {
         Log.i(TAG, "on picture taken")
-        Observable.just(p0)
+        val pictureBytes = p0?.takeIf { it.isNotEmpty() }
+        if (pictureBytes == null) {
+            Log.e(TAG, "Camera returned an empty picture")
+            shutted = true
+            busy = false
+            (context as Activity).runOnUiThread {
+                try {
+                    p1?.startPreview()
+                } catch (e: RuntimeException) {
+                    Log.e(TAG, "Failed to restart camera preview", e)
+                }
+            }
+            return
+        }
+        Observable.just(pictureBytes)
             .subscribeOn(proxySchedule)
-            .subscribe {
-                val pictureSize = p1?.parameters?.pictureSize
-                Log.i(TAG, "picture size: " + pictureSize.toString())
-                val mat = Mat(
-                    Size(
-                        pictureSize?.width?.toDouble() ?: 1920.toDouble(),
-                        pictureSize?.height?.toDouble() ?: 1080.toDouble()
-                    ), CvType.CV_8U
-                )
-                mat.put(0, 0, p0)
-                val pic = Imgcodecs.imdecode(mat, Imgcodecs.IMREAD_UNCHANGED)
+            .subscribe({ bytes ->
+                val buffer = Mat(1, bytes.size, CvType.CV_8UC1)
+                val pic = try {
+                    buffer.put(0, 0, bytes)
+                    Imgcodecs.imdecode(buffer, Imgcodecs.IMREAD_UNCHANGED)
+                } finally {
+                    buffer.release()
+                }
+                if (pic.empty()) {
+                    pic.release()
+                    throw IllegalArgumentException("Camera picture could not be decoded")
+                }
                 Core.rotate(pic, pic, Core.ROTATE_90_CLOCKWISE)
-                mat.release()
                 detectEdge(pic)
                 shutted = true
                 busy = false
-            }
+            }, { error ->
+                Log.e(TAG, "Failed to process camera picture", error)
+                shutted = true
+                busy = false
+                (context as Activity).runOnUiThread {
+                    try {
+                        p1?.startPreview()
+                    } catch (e: RuntimeException) {
+                        Log.e(TAG, "Failed to restart camera preview", e)
+                    }
+                }
+            })
     }
 
     override fun onPreviewFrame(p0: ByteArray?, p1: Camera?) {
