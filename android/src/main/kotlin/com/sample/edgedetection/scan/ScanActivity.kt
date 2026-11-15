@@ -3,7 +3,6 @@ package com.sample.edgedetection.scan
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -22,9 +21,9 @@ import org.opencv.android.OpenCVLoader
 import org.opencv.core.Core
 import org.opencv.core.CvType
 import org.opencv.core.Mat
-import org.opencv.core.Size
 import org.opencv.imgcodecs.Imgcodecs
-import java.io.*
+import java.io.File
+import java.io.IOException
 
 class ScanActivity : BaseActivity(), IScanView.Proxy {
 
@@ -165,49 +164,33 @@ class ScanActivity : BaseActivity(), IScanView.Proxy {
     @RequiresApi(Build.VERSION_CODES.P)
     fun onImageSelected(imageUri: Uri) {
         try {
-            val iStream: InputStream = contentResolver.openInputStream(imageUri)!!
-
-            val exif = ExifInterface(iStream)
             var rotation = -1
-            val orientation: Int = exif.getAttributeInt(
+            val orientation = contentResolver.openInputStream(imageUri)?.use { stream ->
+                ExifInterface(stream).getAttributeInt(
                     ExifInterface.TAG_ORIENTATION,
                     ExifInterface.ORIENTATION_UNDEFINED
-            )
+                )
+            } ?: throw IOException("Could not open selected image")
             when (orientation) {
                 ExifInterface.ORIENTATION_ROTATE_90 -> rotation = Core.ROTATE_90_CLOCKWISE
                 ExifInterface.ORIENTATION_ROTATE_180 -> rotation = Core.ROTATE_180
                 ExifInterface.ORIENTATION_ROTATE_270 -> rotation = Core.ROTATE_90_COUNTERCLOCKWISE
             }
-            val mimeType = contentResolver.getType(imageUri)
-            var imageWidth: Double
-            var imageHeight: Double
-
-            if (mimeType?.startsWith("image/png") == true) {
-                val source = ImageDecoder.createSource(contentResolver, imageUri)
-                val drawable = ImageDecoder.decodeDrawable(source)
-
-                imageWidth = drawable.intrinsicWidth.toDouble()
-                imageHeight = drawable.intrinsicHeight.toDouble()
-
-                if (rotation == Core.ROTATE_90_CLOCKWISE || rotation == Core.ROTATE_90_COUNTERCLOCKWISE) {
-                    imageWidth = drawable.intrinsicHeight.toDouble()
-                    imageHeight = drawable.intrinsicWidth.toDouble()
-                }
-            } else {
-                imageWidth = exif.getAttributeInt(ExifInterface.TAG_IMAGE_WIDTH, 0).toDouble()
-                imageHeight = exif.getAttributeInt(ExifInterface.TAG_IMAGE_LENGTH, 0).toDouble()
-                if (rotation == Core.ROTATE_90_CLOCKWISE || rotation == Core.ROTATE_90_COUNTERCLOCKWISE) {
-                    imageWidth = exif.getAttributeInt(ExifInterface.TAG_IMAGE_LENGTH, 0).toDouble()
-                    imageHeight = exif.getAttributeInt(ExifInterface.TAG_IMAGE_WIDTH, 0).toDouble()
-                }
+            val inputData = contentResolver.openInputStream(imageUri)?.use { it.readBytes() }
+                ?: throw IOException("Could not read selected image")
+            if (inputData.isEmpty()) throw IOException("Selected image is empty")
+            val mat = Mat(1, inputData.size, CvType.CV_8UC1)
+            val pic = try {
+                mat.put(0, 0, inputData)
+                Imgcodecs.imdecode(mat, Imgcodecs.IMREAD_UNCHANGED)
+            } finally {
+                mat.release()
             }
-
-            val inputData: ByteArray? = getBytes(contentResolver.openInputStream(imageUri)!!)
-            val mat = Mat(Size(imageWidth, imageHeight), CvType.CV_8U)
-            mat.put(0, 0, inputData)
-            val pic = Imgcodecs.imdecode(mat, Imgcodecs.IMREAD_UNCHANGED)
+            if (pic.empty()) {
+                pic.release()
+                throw IOException("Selected image could not be decoded")
+            }
             if (rotation > -1) Core.rotate(pic, pic, rotation)
-            mat.release()
 
             mPresenter.detectEdge(pic)
         } catch (error: Exception) {
@@ -219,15 +202,4 @@ class ScanActivity : BaseActivity(), IScanView.Proxy {
 
     }
 
-    @Throws(IOException::class)
-    fun getBytes(inputStream: InputStream): ByteArray? {
-        val byteBuffer = ByteArrayOutputStream()
-        val bufferSize = 1024
-        val buffer = ByteArray(bufferSize)
-        var len: Int
-        while (inputStream.read(buffer).also { len = it } != -1) {
-            byteBuffer.write(buffer, 0, len)
-        }
-        return byteBuffer.toByteArray()
-    }
 }
